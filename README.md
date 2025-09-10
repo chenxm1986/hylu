@@ -12,6 +12,10 @@ Only x64 libraries are provided. This means that, a 64-bit Windows or Linux oper
 
 Functions for both 32-bit integers and 64-bit integers are provided. The latter has '_L' in the function names. The integer bitwidth only limits the size of the input matrix. The internal data structures always use 64-bit integers.
 
+Publications
+============
+[1] Xiaoming Chen, "HYLU: Hybrid Parallel Sparse LU Factorization", arXiv: 2509.07690, https://arxiv.org/abs/2509.07690.
+
 Author
 ============
 Please visit [Xiaoming Chen's personal page](http://people.ucas.edu.cn/~chenxm).
