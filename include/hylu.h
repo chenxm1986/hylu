@@ -1,5 +1,5 @@
 /*
-* HYLU (Hybrid Parallel Sparse LU Factorization) is a general-purpose parallel solver designed for efficiently solving sparse linear systems (Ax=b) on multi-core shared-memory architectures.
+* HYLU (Hybrid Parallel Sparse LU Factorization) is a general-purpose parallel solver designed for efficiently solving sparse linear systems (Ax=b) on multi-core shared-memory machines.
 */
 
 #ifndef __HYLU_H__
