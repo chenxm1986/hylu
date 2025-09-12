@@ -31,7 +31,7 @@
 * parm[7]: output, time (in microsecond) of last function call
 * parm[8]: output, # of off-diagonal pivots
 * parm[9]: output, # of supernodes
-* parm[10]: input, pivot perturbation, zero or small pivot will be replaced by (10**parm[10])*||A||. [default -16]
+* parm[10]: input, pivot perturbation, zero or small pivot will be replaced by (10**parm[10])*||A||. [default -15]
 * parm[11]: output, # of perturbed pivots
 * parm[12]: output, current memory usage (in bytes), or needed memory size (in bytes) when -4 is returned
 * parm[13]: output, maximum memory usage (in bytes)
@@ -42,7 +42,7 @@
 * parm[18]: output, # of nonzeros in U, excluding diagonal
 * parm[19]: output, # of flops of factorization (excluding scaling)
 * parm[20]: output, # of flops of solving (excluding scaling)
-* parm[21]: input, whether to scale matrix. [default 1]
+* parm[21]: input, whether to scale matrix. [default 1]: dynamic scaling | -1: static scaling | 0: no scaling
 * parm[22]: input, whether to use symmetric symbolic factorization. [default -1]: automatic control | 0: disabled | 1: enabled
 ********************************/
 
