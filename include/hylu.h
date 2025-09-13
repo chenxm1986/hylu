@@ -36,14 +36,14 @@
 * parm[12]: output, current memory usage (in bytes), or needed memory size (in bytes) when -4 is returned
 * parm[13]: output, maximum memory usage (in bytes)
 * parm[14]: output, thread # stored in 3 shorts, from lowest to highest: physical core # (may be incorrect), logical core #, created threads #. highest short is not used
-* parm[15]: input, maximum # of refinement iterations. [default 0]: automatic control
+* parm[15]: input, maximum # of refinement iterations. [default 0]: automatic control | >0: perform at most parm[15] iterations | <0: force to perform -parm[15] iterations
 * parm[16]: output, # of refinement iterations performed
 * parm[17]: output, # of nonzeros in L, including diagonal
 * parm[18]: output, # of nonzeros in U, excluding diagonal
 * parm[19]: output, # of flops of factorization (excluding scaling)
 * parm[20]: output, # of flops of solving (excluding scaling)
-* parm[21]: input, whether to scale matrix. [default 1]: dynamic scaling | -1: static scaling | 0: no scaling
-* parm[22]: input, whether to use symmetric symbolic factorization. [default -1]: automatic control | 0: disabled | 1: enabled
+* parm[21]: input, whether to scale matrix. [default >0]: dynamic scaling | <0: static scaling | 0: no scaling
+* parm[22]: input, whether to use symmetric symbolic factorization. [default <0]: automatic control | 0: disabled | >0: enabled
 ********************************/
 
 #ifndef __cplusplus
