@@ -1,5 +1,6 @@
 /*
-* HYLU (Hybrid Parallel Sparse LU Factorization) is a general-purpose parallel solver designed for efficiently solving sparse linear systems (Ax=b) on multi-core shared-memory machines.
+* HYLU (Hybrid Parallel Sparse LU Factorization) is a general-purpose parallel solver designed for efficiently solving sparse linear systems (Ax=b) 
+* on multi-core shared-memory machines.
 */
 
 #ifndef __HYLU_H__
@@ -43,7 +44,7 @@
 * parm[19]: output, # of flops of factorization (excluding scaling)
 * parm[20]: output, # of flops of solving (excluding scaling)
 * parm[21]: input, whether to scale matrix. [default >0]: dynamic scaling | <0: static scaling | 0: no scaling
-* parm[22]: input, whether to use symmetric symbolic factorization. [default <0]: automatic control | 0: disabled | >0: enabled
+* parm[22]: input, symbolic factorization method. [default 0]: automatic control | >0: unsymmetric symbolic factorization | <0: symmetric symbolic factorization
 ********************************/
 
 #ifndef __cplusplus
@@ -109,7 +110,7 @@ int HYLU_Analyze
 	_IN_ int n,
 	_IN_ const int ap[],
 	_IN_ const int ai[],
-	_IN_ const double ax[] /*can be NULL*/
+	_IN_ const double ax[] /*can be NULL (static pivoting and static scaling will be disabled)*/
 );
 int HYLU_L_Analyze
 (
@@ -118,7 +119,7 @@ int HYLU_L_Analyze
 	_IN_ long long n,
 	_IN_ const long long ap[],
 	_IN_ const long long ai[],
-	_IN_ const double ax[] /*can be NULL*/
+	_IN_ const double ax[] /*can be NULL (static pivoting and static scaling will be disabled)*/
 );
 
 /*

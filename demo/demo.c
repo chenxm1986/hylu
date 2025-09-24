@@ -138,7 +138,8 @@ int main(int argc, const char *argv[])
     if (argc < 3)
     {
         printf("Usage: ./a.out <mtx file> <# of threads>\n");
-        printf("Example: ./a.out add20.mtx 4\n");
+        printf("Example: ./a.out xxx.mtx 4\n");
+        printf("mtx files can be downloaded from https://sparse.tamu.edu\n");
         return -1;
     }
 
@@ -153,7 +154,7 @@ int main(int argc, const char *argv[])
     double res;
 
     if (!ReadMtxFile(argv[1], &n, &ap, &ai, &ax)) goto RETURN;
-    printf("Matrix dimension = %d.\n# NZ = %d.\n", n, ap[n]);
+    printf("N(A) = %d.\n# NZ(A) = %d.\n", n, ap[n]);
 
     b = (double *)malloc(sizeof(double) * n * 2);
     if (NULL == b)
@@ -185,8 +186,8 @@ int main(int argc, const char *argv[])
     printf("Matrix analysis time = %g.\n", parm[7] * 1.e-6);
     printf("# NZ(L) = %lld.\n", parm[17]);
     printf("# NZ(U) = %lld.\n", parm[18]);
-    printf("FLOPS(factor) = %lld.\n", parm[19]);
-    printf("FLOPS(solve) = %lld.\n", parm[20]);
+    printf("# FLOPS(factor) = %lld.\n", parm[19]);
+    printf("# FLOPS(solve) = %lld.\n", parm[20]);
     printf("# Supernodes = %d.\n", (int)parm[9]);
 
     ret = HYLU_Factorize(instance, ax);
@@ -209,7 +210,7 @@ int main(int argc, const char *argv[])
     printf("# Refinements = %d.\n", (int)parm[16]);
 
     res = L1NormOfResidual(n, ap, ai, ax, x, b, false);
-    printf("Residual = %g.\n", res);
+    printf("Residual (||Ax-b||/||b||) = %g.\n", res);
 
 RETURN:
     free(ap);
