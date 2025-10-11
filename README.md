@@ -6,7 +6,7 @@ HYLU is a general-purpose parallel solver designed for efficiently solving spars
 
 Performance Results
 ============
-For a wide range of matrices with different sparsities, HYLU achieves a 1.74X speedup on geometric mean in numerical factorization compared with Intel MKL PARDISO, while the preprocessing and forward-backward substitution performance are both similar (1.09X and 1.22X, respectively). Please see [doc/results.pdf](https://github.com/chenxm1986/hylu/blob/main/doc/results.pdf) for details. Generally, HYLU is much faster than Intel MKL PARDISO for highly sparse matrices. HYLU is slightly slower for relatively dense matrices, which are actually more suitable for iterative methods.
+For a wide range of matrices with different sparsities, HYLU achieves a 1.71X speedup on geometric mean in numerical factorization compared with Intel MKL PARDISO, while the preprocessing and forward-backward substitution phases are also slightly faster (1.37X and 1.41X speedups, respectively). HYLU offers an optimization option for repeated solve of linear systems with an identical sparse pattern in the coefficient matrix. In this case, HYLU achieves a 2.21X geometric mean speedup in numerical factorization over Intel MKL PARDISO, while the forward-backward substitution phase is slightly faster (1.32X speedup). Please see [doc/results.pdf](https://github.com/chenxm1986/hylu/blob/main/doc/results.pdf) for details. Generally, HYLU is much faster than Intel MKL PARDISO for highly sparse matrices. HYLU is slightly slower for relatively dense matrices, which are actually more suitable for iterative methods.
 
 
 
