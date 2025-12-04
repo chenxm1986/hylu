@@ -55,6 +55,8 @@
 #include <stdbool.h>
 #endif
 
+typedef double complex_t[2];
+
 #define _IN_
 #define _OUT_
 
@@ -81,6 +83,18 @@ int HYLU_L_CreateSolver
 	_OUT_ long long **parm, /*can be NULL if not needed*/
 	_IN_ int threads /*1: sequential. 0: use all physical cores. -1: use all logical cores*/
 );
+int HYLU_C_CreateSolver
+(
+	_OUT_ void **instance,
+	_OUT_ long long **parm, /*can be NULL if not needed*/
+	_IN_ int threads /*1: sequential. 0: use all physical cores. -1: use all logical cores*/
+);
+int HYLU_CL_CreateSolver
+(
+	_OUT_ void **instance,
+	_OUT_ long long **parm, /*can be NULL if not needed*/
+	_IN_ int threads /*1: sequential. 0: use all physical cores. -1: use all logical cores*/
+);
 
 /*
 * Frees memory, terminates threads, and destroys solver instance
@@ -94,6 +108,14 @@ int HYLU_L_DestroySolver
 (
 	_IN_ void *instance
 );
+int HYLU_C_DestroySolver
+(
+	_IN_ void *instance
+);
+int HYLU_CL_DestroySolver
+(
+	_IN_ void *instance
+);
 
 /*
 * Analyzes matrix for ordering and symbolic factorization
@@ -102,7 +124,7 @@ int HYLU_L_DestroySolver
 * @n: matrix dimension
 * @ap: integer array of length n+1, matrix row pointers
 * @ai: integer array of length ap[n], matrix column indexes
-* @ax: double array of length ap[n], matrix values
+* @ax: double/complex_t array of length ap[n], matrix values
 */
 int HYLU_Analyze
 (
@@ -122,11 +144,80 @@ int HYLU_L_Analyze
 	_IN_ const long long ai[],
 	_IN_ const double ax[] /*can be NULL (static pivoting and static scaling will be disabled)*/
 );
+int HYLU_C_Analyze
+(
+	_IN_ void *instance,
+	_IN_ bool repeat,
+	_IN_ int n,
+	_IN_ const int ap[],
+	_IN_ const int ai[],
+	_IN_ const complex_t ax[] /*can be NULL (static pivoting and static scaling will be disabled)*/
+);
+int HYLU_CL_Analyze
+(
+	_IN_ void *instance,
+	_IN_ bool repeat,
+	_IN_ long long n,
+	_IN_ const long long ap[],
+	_IN_ const long long ai[],
+	_IN_ const complex_t ax[] /*can be NULL (static pivoting and static scaling will be disabled)*/
+);
+
+/*
+* Analyzes matrix for symbolic factorization with user-provided ordering
+* @instance: solver instance
+* @repeat: whether linear systems will be solved repeatedly with identical matrix structure (false for one-time solving)
+* @n: matrix dimension
+* @ap: integer array of length n+1, matrix row pointers
+* @ai: integer array of length ap[n], matrix column indexes
+* @rperm: row permutation (rperm[i]=ii means row i in permuted matrix is row ii in original matrix)
+* @cperm: column permutation (cperm[j]=jj means column j in permuted matrix is column jj in original matrix)
+*/
+int HYLU_Analyze2
+(
+	_IN_ void *instance,
+	_IN_ bool repeat,
+	_IN_ int n,
+	_IN_ const int ap[],
+	_IN_ const int ai[],
+	_IN_ const int rperm[],
+	_IN_ const int cperm[]
+);
+int HYLU_L_Analyze2
+(
+	_IN_ void *instance,
+	_IN_ bool repeat,
+	_IN_ long long n,
+	_IN_ const long long ap[],
+	_IN_ const long long ai[],
+	_IN_ const long long rperm[],
+	_IN_ const long long cperm[]
+);
+int HYLU_C_Analyze2
+(
+	_IN_ void *instance,
+	_IN_ bool repeat,
+	_IN_ int n,
+	_IN_ const int ap[],
+	_IN_ const int ai[],
+	_IN_ const int rperm[],
+	_IN_ const int cperm[]
+);
+int HYLU_CL_Analyze2
+(
+	_IN_ void *instance,
+	_IN_ bool repeat,
+	_IN_ long long n,
+	_IN_ const long long ap[],
+	_IN_ const long long ai[],
+	_IN_ const long long rperm[],
+	_IN_ const long long cperm[]
+);
 
 /*
 * Factorizes matrix with diagonal block pivoting
 * @instance: solver instance
-* @ax: double array of length ap[n], matrix values
+* @ax: double/complex_t array of length ap[n], matrix values
 */
 int HYLU_Factorize
 (
@@ -138,13 +229,23 @@ int HYLU_L_Factorize
 	_IN_ void *instance,
 	_IN_ const double ax[] /*can be different from that used for HYLU_L_Analyze*/
 );
+int HYLU_C_Factorize
+(
+	_IN_ void *instance,
+	_IN_ const complex_t ax[] /*can be different from that used for HYLU_Analyze*/
+);
+int HYLU_CL_Factorize
+(
+	_IN_ void *instance,
+	_IN_ const complex_t ax[] /*can be different from that used for HYLU_L_Analyze*/
+);
 
 /*
 * Solves Ax=b after A is factorized
 * @instance: solver instance
 * @transpose: whether to solve (A**T)x=b, note that HYLU uses row-major order by default
-* @b: double array of length n to specify right-hand-side vector
-* @x: double array of length n to get solution
+* @b: double/complex_t array of length n to specify right-hand-side vector
+* @x: double/complex_t array of length n to get solution
 */
 int HYLU_Solve
 (
@@ -159,6 +260,20 @@ int HYLU_L_Solve
 	_IN_ bool transpose, /*false for row mode, true for column mode*/
 	_IN_ const double b[],
 	_OUT_ double x[] /*x space can overlap b space*/
+);
+int HYLU_C_Solve
+(
+	_IN_ void *instance,
+	_IN_ bool transpose, /*false for row mode, true for column mode*/
+	_IN_ const complex_t b[],
+	_OUT_ complex_t x[] /*x space can overlap b space*/
+);
+int HYLU_CL_Solve
+(
+	_IN_ void *instance,
+	_IN_ bool transpose, /*false for row mode, true for column mode*/
+	_IN_ const complex_t b[],
+	_OUT_ complex_t x[] /*x space can overlap b space*/
 );
 
 #ifdef __cplusplus

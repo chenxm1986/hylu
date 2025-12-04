@@ -117,15 +117,14 @@ double L1NormOfResidual(const int n, const int ap[], const int ai[], const doubl
         double s = 0., s2 = 0.;
         for (int i = 0; i < n; ++i)
         {
-            double r = 0.;
+            double r = b[i];
             const int start = ap[i];
             const int end = ap[i + 1];
             for (int p = start; p < end; ++p)
             {
                 const int j = ai[p];
-                r += ax[p] * x[j];
+                r -= ax[p] * x[j];
             }
-            r -= b[i];
             s += fabs(r);
             s2 += fabs(b[i]);
         }
@@ -137,8 +136,8 @@ int main(int argc, const char *argv[])
 {
     if (argc < 3)
     {
-        printf("Usage: ./a.out <mtx file> <# of threads>\n");
-        printf("Example: ./a.out xxx.mtx 4\n");
+        printf("Usage: ./demo <mtx file> <# of threads>\n");
+        printf("Example: ./demo xxx.mtx 4\n");
         printf("mtx files can be downloaded from https://sparse.tamu.edu\n");
         return -1;
     }
@@ -165,7 +164,7 @@ int main(int argc, const char *argv[])
     x = b + n;
     for (int i = 0; i < n; ++i)
     {
-        b[i] = (double)rand() / RAND_MAX * 100.;
+        b[i] = (double)rand() / RAND_MAX * 100. - 50.;
         x[i] = 0.;
     }
 
