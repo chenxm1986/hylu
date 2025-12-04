@@ -2,7 +2,8 @@ HYLU----Hybrid Parallel Sparse LU Factorization
 =========
 HYLU is a general-purpose parallel solver designed for efficiently solving sparse linear systems ($\bf{Ax}=\bf b$) on multi-core shared-memory machines. It employs an innovative parallel up-looking LU factorization algorithm, which dynamically adapts to varying matrix sparsity patterns by leveraging hybrid numerical kernels.
 
-HYLU provides high-performance LU factorization for many areas, such as circuit simulation, power network simulation, finite element analysis, 2D/3D problem, optimization problem, computational fluid dynamics problem, electromagnetics problem, structural problem, etc.
+
+HYLU delivers high-performance LU factorization for large-scale sparse linear systems from multiple engineering and scientific domains, including circuit simulation, power systems, computational fluid dynamics (CFD), electromagnetics, and structural analysis. The solver efficiently handles linear systems arising from finite element analysis, 2D/3D modeling, and optimization problems.
 
 
 Performance Results
