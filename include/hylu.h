@@ -164,7 +164,7 @@ int HYLU_CL_Analyze
 );
 
 /*
-* Analyzes matrix for symbolic factorization with user-provided ordering
+* Analyzes matrix for symbolic factorization with user-provided ordering (must ensure a zero-free diagonal)
 * @instance: solver instance
 * @repeat: whether linear systems will be solved repeatedly with identical matrix structure (false for one-time solving)
 * @n: matrix dimension
