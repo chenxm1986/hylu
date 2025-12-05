@@ -30,7 +30,7 @@ History
 	+ Initial release
 
 + Version before 20251015
-	+ Trial version
+	+ Test version
 
 
 Publications
