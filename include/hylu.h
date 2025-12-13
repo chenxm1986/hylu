@@ -276,6 +276,47 @@ int HYLU_CL_Solve
 	_OUT_ complex_t x[] /*x space can overlap b space*/
 );
 
+/*
+* Solves Ax=b (multiple x's and b's) after A is factorized
+* @instance: solver instance
+* @transpose: whether to solve (A**T)x=b, note that HYLU uses row-major order by default
+* @nrhs: number of right-hand-side vectors
+* @b: double/complex_t array of length n*nrhs to specify right-hand-side vector
+* @x: double/complex_t array of length n*nrhs to get solution
+*/
+int HYLU_MSolve
+(
+	_IN_ void *instance,
+	_IN_ bool transpose, /*false for row mode, true for column mode*/
+	_IN_ int nrhs,
+	_IN_ const double b[],
+	_OUT_ double x[] /*x space can overlap b space*/
+);
+int HYLU_L_MSolve
+(
+	_IN_ void *instance,
+	_IN_ bool transpose, /*false for row mode, true for column mode*/
+	_IN_ long long nrhs,
+	_IN_ const double b[],
+	_OUT_ double x[] /*x space can overlap b space*/
+);
+int HYLU_C_MSolve
+(
+	_IN_ void *instance,
+	_IN_ bool transpose, /*false for row mode, true for column mode*/
+	_IN_ int nrhs,
+	_IN_ const complex_t b[],
+	_OUT_ complex_t x[] /*x space can overlap b space*/
+);
+int HYLU_CL_MSolve
+(
+	_IN_ void *instance,
+	_IN_ bool transpose, /*false for row mode, true for column mode*/
+	_IN_ long long nrhs,
+	_IN_ const complex_t b[],
+	_OUT_ complex_t x[] /*x space can overlap b space*/
+);
+
 #ifdef __cplusplus
 }
 #endif

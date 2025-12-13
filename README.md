@@ -22,6 +22,10 @@ Functions for both 32-bit integers and 64-bit integers are provided. The latter 
 
 History
 ============
++ Version 20251212
+	+ Added a function to solve multiple right-hand-side vectors
+	+ Updated nested dissection for repeated solving
+
 + Version 20251203
 	+ Added a function to support user-provided ordering
 	+ Added complex number support
