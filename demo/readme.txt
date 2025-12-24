@@ -1,0 +1,1 @@
+This demo code cannot directly handle symmetric matrices, because only the lower triangular part is stored in the mtx file, if the matrix is symmetric. The upper triangular part should be supplemented, before it can be handled by HYLU.

@@ -45,7 +45,7 @@
 * parm[20]: output, # of flops of solving (excluding scaling)
 * parm[21]: input, whether to scale matrix. [default >0]: dynamic scaling | <0: static scaling | 0: no scaling
 * parm[22]: input, symbolic factorization method. [default 0]: automatic control | >0: unsymmetric symbolic factorization | <0: symmetric symbolic factorization
-* parm[23]: input, whether to use parallel nested dissection. [default 1]: enabled | 0: disabled
+* parm[23]: input, whether to use parallel nested dissection. [default >0]: enabled with deterministic ordering result | 0: disabled | <0: enabled with non-deterministic ordering result
 ********************************/
 
 #ifndef __cplusplus
