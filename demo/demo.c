@@ -137,7 +137,7 @@ int main(int argc, const char *argv[])
     if (argc < 3)
     {
         printf("Usage: ./demo <mtx file> <# of threads>\n");
-        printf("Example: ./demo xxx.mtx 4\n");
+        printf("Example: ./demo ss1.mtx 4\n");
         printf("mtx files can be downloaded from https://sparse.tamu.edu\n");
         return -1;
     }

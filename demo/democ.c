@@ -148,7 +148,7 @@ int main(int argc, const char *argv[])
     if (argc < 3)
     {
         printf("Usage: ./democ <mtx file> <# of threads>\n");
-        printf("Example: ./democ xxx.mtx 4\n");
+        printf("Example: ./democ ss1.mtx 4\n");
         printf("mtx files can be downloaded from https://sparse.tamu.edu\n");
         printf("This demo code reads a real number matrix and generates the imaginary parts randomly\n");
         return -1;
