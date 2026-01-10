@@ -11,6 +11,11 @@ Performance Results
 For a wide range of matrices with different sparsities, HYLU achieves a **2.04X** speedup on geometric mean in numerical factorization compared with Intel MKL PARDISO, while the preprocessing and forward-backward substitution phases are also faster (**1.56X** and **1.46X** speedups, respectively). HYLU offers an optimization option for repeated solve of linear systems with an identical sparse pattern in the coefficient matrix. In this scenario, HYLU achieves a **2.58X** geometric mean speedup in numerical factorization over Intel MKL PARDISO, while the forward-backward substitution phase is slightly faster (**1.35X** speedup). Please see [doc/results.pdf](https://github.com/chenxm1986/hylu/blob/main/doc/results.pdf) for details. Generally, HYLU is much faster than Intel MKL PARDISO for highly sparse matrices, while for relatively dense matrices, HYLU achieves similar performance to Intel MKL PARDISO.
 
 
+System Requirements
+=============
++ Hardware requirement: X64 CPU with AVX2 and FMA instructions supported
+
++ Software requirement: Windows 7/10/11 or CentOS 7/8 (mainstream Linux distributions are also supported)
 
 
 Notes on Library and Integer Bitwidths
