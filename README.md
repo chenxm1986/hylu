@@ -27,6 +27,9 @@ Functions for both 32-bit integers and 64-bit integers are provided. The latter 
 
 History
 ============
++ Version 20260126
+	+ Updated parm[23] (whether to ensure consistent symbolic results between sequential and parallel executions)
+
 + Version 20260116
 	+ Performance improvement
 
