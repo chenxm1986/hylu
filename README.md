@@ -29,6 +29,7 @@ History
 ============
 + Version 20260205
 	+ Added functions to calculate determinant and condition number
+	+ Added solve of conjugate transposed system (only for complex number system)
 
 + Version 20260126
 	+ Updated parm[23] (whether to ensure consistent symbolic results between sequential and parallel executions)
