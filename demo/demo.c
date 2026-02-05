@@ -13,7 +13,7 @@
 #pragma comment(lib, "hylu.lib")
 #endif
 
-bool ReadMtxFile(const char file[], int *n, int **ap, int **ai, double **ax)
+static bool ReadMtxFile(const char file[], int *n, int **ap, int **ai, double **ax)
 {
     FILE *fp = fopen(file, "r");
     if (NULL == fp)
@@ -87,7 +87,7 @@ bool ReadMtxFile(const char file[], int *n, int **ap, int **ai, double **ax)
     return true;
 }
 
-double L1NormOfResidual(const int n, const int ap[], const int ai[], const double ax[], const double x[], const double b[], bool row0_col1)
+static double L1NormOfResidual(const int n, const int ap[], const int ai[], const double ax[], const double x[], const double b[], bool row0_col1)
 {
     if (row0_col1)
     {
@@ -132,6 +132,12 @@ double L1NormOfResidual(const int n, const int ap[], const int ai[], const doubl
     }
 }
 
+static __inline unsigned int Rand(unsigned int *x)
+{
+    *x = *x * 134775813 + 1;
+    return *x;
+}
+
 int main(int argc, const char *argv[])
 {
     if (argc < 3)
@@ -151,6 +157,9 @@ int main(int argc, const char *argv[])
     long long *parm = NULL;
     int ret = 0;
     double res;
+    unsigned int rd = 1234;
+    double mantissa, exponent;
+    double cond;
 
     if (!ReadMtxFile(argv[1], &n, &ap, &ai, &ax)) goto RETURN;
     printf("N(A) = %d.\n# NZ(A) = %d.\n", n, ap[n]);
@@ -164,7 +173,7 @@ int main(int argc, const char *argv[])
     x = b + n;
     for (int i = 0; i < n; ++i)
     {
-        b[i] = (double)rand() / RAND_MAX * 100. - 50.;
+        b[i] = (double)Rand(&rd) / (double)0xFFFFFFFF * 100. - 50.;
         x[i] = 0.;
     }
 
@@ -210,6 +219,22 @@ int main(int argc, const char *argv[])
 
     res = L1NormOfResidual(n, ap, ai, ax, x, b, false);
     printf("Residual (||Ax-b||/||b||) = %g.\n", res);
+
+    ret = HYLU_Determinant(instance, &mantissa, &exponent);
+    if (ret < 0)
+    {
+        printf("Determinant calculation failed, return code = %d.\n", ret);
+        goto RETURN;
+    }
+    printf("Determinant = %g * 10**(%.0lf).\n", mantissa, exponent);
+
+    ret = HYLU_ConditionNumber(instance, &cond);
+    if (ret < 0)
+    {
+        printf("Condition number calculation failed, return code = %d.\n", ret);
+        goto RETURN;
+    }
+    printf("Condition number = %g.\n", cond);
 
 RETURN:
     free(ap);

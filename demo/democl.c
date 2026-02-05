@@ -14,7 +14,7 @@
 #pragma comment(lib, "hylu_cl.lib")
 #endif
 
-bool ReadMtxFile(const char file[], long long *n, long long **ap, long long **ai, double **ax)
+static bool ReadMtxFile(const char file[], long long *n, long long **ap, long long **ai, double **ax)
 {
     FILE *fp = fopen(file, "r");
     if (NULL == fp)
@@ -88,7 +88,7 @@ bool ReadMtxFile(const char file[], long long *n, long long **ap, long long **ai
     return true;
 }
 
-__inline void __cmulsub(complex_t z, const complex_t a, const complex_t b) /* z-=a*b */
+static __inline void __cmulsub(complex_t z, const complex_t a, const complex_t b) /* z-=a*b */
 {
 	const double a0 = a[0];
 	const double a1 = a[1];
@@ -98,20 +98,46 @@ __inline void __cmulsub(complex_t z, const complex_t a, const complex_t b) /* z-
 	z[1] -= a0 * b1 + a1 * b0;
 }
 
-double L1NormOfResidual(const long long n, const long long ap[], const long long ai[], const complex_t ax[], const complex_t x[], const complex_t b[], bool row0_col1)
+static __inline void __cmulsub_conj(complex_t z, const complex_t a, const complex_t b) /* z-=conj(a)*b */
 {
-    if (row0_col1)
+	const double a0 = a[0];
+	const double a1 = a[1];
+	const double b0 = b[0];
+	const double b1 = b[1];
+	z[0] -= a0 * b0 + a1 * b1;
+	z[1] -= a0 * b1 - a1 * b0;
+}
+
+static double L1NormOfResidual(const long long n, const long long ap[], const long long ai[], const complex_t ax[], const complex_t x[], const complex_t b[], char mode)
+{
+    if (mode)
     {
         complex_t *bb = (complex_t *)malloc(sizeof(complex_t) * n);
         memcpy(bb, b, sizeof(complex_t) * n);
-        for (long long i = 0; i < n; ++i)
+        if (mode > 0)
         {
-            const complex_t xx = { x[i][0], x[i][1] };
-            const long long start = ap[i];
-            const long long end = ap[i + 1];
-            for (long long p = start; p < end; ++p)
+            for (long long i = 0; i < n; ++i)
             {
-                __cmulsub(bb[ai[p]], xx, ax[p]);
+                const complex_t xx = { x[i][0], x[i][1] };
+                const long long start = ap[i];
+                const long long end = ap[i + 1];
+                for (long long p = start; p < end; ++p)
+                {
+                    __cmulsub(bb[ai[p]], ax[p], xx);
+                }
+            }
+        }
+        else
+        {
+            for (long long i = 0; i < n; ++i)
+            {
+                const complex_t xx = { x[i][0], x[i][1] };
+                const long long start = ap[i];
+                const long long end = ap[i + 1];
+                for (long long p = start; p < end; ++p)
+                {
+                    __cmulsub_conj(bb[ai[p]], ax[p], xx);
+                }
             }
         }
         double s = 0., s2 = 0.;
@@ -143,12 +169,18 @@ double L1NormOfResidual(const long long n, const long long ap[], const long long
     }
 }
 
+static __inline unsigned int Rand(unsigned int *x)
+{
+    *x = *x * 134775813 + 1;
+    return *x;
+}
+
 int main(int argc, const char *argv[])
 {
     if (argc < 3)
     {
-        printf("Usage: ./democ <mtx file> <# of threads>\n");
-        printf("Example: ./democ ss1.mtx 4\n");
+        printf("Usage: ./democl <mtx file> <# of threads>\n");
+        printf("Example: ./democl ss1.mtx 4\n");
         printf("mtx files can be downloaded from https://sparse.tamu.edu\n");
         printf("This demo code reads a real number matrix and generates the imaginary parts randomly\n");
         return -1;
@@ -164,6 +196,10 @@ int main(int argc, const char *argv[])
     long long *parm = NULL;
     int ret = 0;
     double res;
+    unsigned int rd = 1234;
+    complex_t mantissa;
+    double exponent;
+    double cond;
 
     if (!ReadMtxFile(argv[1], &n, &ap, &ai, &ax)) goto RETURN;
     printf("N(A) = %lld.\n# NZ(A) = %lld.\n", n, ap[n]);
@@ -178,7 +214,7 @@ int main(int argc, const char *argv[])
     for (long long i = 0; i<nz; ++i)
     {
         cx[i][0] = ax[i];
-        cx[i][1] = ax[i] * ((double)rand() / RAND_MAX * 8. - 4.);
+        cx[i][1] = ax[i] * ((double)Rand(&rd) / (double)0xFFFFFFFF * 8. - 4.);
     }
 
     b = (complex_t *)malloc(sizeof(complex_t) * n * 2);
@@ -190,8 +226,8 @@ int main(int argc, const char *argv[])
     x = b + n;
     for (long long i = 0; i < n; ++i)
     {
-        b[i][0] = (double)rand() / RAND_MAX * 100. - 50.;
-        b[i][1] = (double)rand() / RAND_MAX * 100. - 50.;
+        b[i][0] = (double)Rand(&rd) / (double)0xFFFFFFFF * 100. - 50.;
+        b[i][1] = (double)Rand(&rd) / (double)0xFFFFFFFF * 100. - 50.;
         x[i][0] = 0.;
         x[i][1] = 0.;
     }
@@ -227,7 +263,7 @@ int main(int argc, const char *argv[])
     printf("# Swapped pivots = %lld.\n", parm[8]);
     printf("# Perturbed pivots = %lld.\n", parm[11]);
 
-    ret = HYLU_CL_Solve(instance, false, b, x);
+    ret = HYLU_CL_Solve(instance, 0, b, x);
     if (ret < 0)
     {
         printf("Triangular solve failed, return code = %d.\n", ret);
@@ -236,8 +272,24 @@ int main(int argc, const char *argv[])
     printf("Triangular solve time = %g.\n", parm[7] * 1.e-6);
     printf("# Refinements = %d.\n", (int)parm[16]);
 
-    res = L1NormOfResidual(n, ap, ai, cx, x, b, false);
+    res = L1NormOfResidual(n, ap, ai, cx, x, b, 0);
     printf("Residual (||Ax-b||/||b||) = %g.\n", res);
+
+    ret = HYLU_CL_Determinant(instance, &mantissa, &exponent);
+    if (ret < 0)
+    {
+        printf("Determinant calculation failed, return code = %d.\n", ret);
+        goto RETURN;
+    }
+    printf("Determinant = (%g, %g) * 10**(%.0lf).\n", mantissa[0], mantissa[1], exponent);
+
+    ret = HYLU_CL_ConditionNumber(instance, &cond);
+    if (ret < 0)
+    {
+        printf("Condition number calculation failed, return code = %d.\n", ret);
+        goto RETURN;
+    }
+    printf("Condition number = %g.\n", cond);
 
 RETURN:
     free(ap);

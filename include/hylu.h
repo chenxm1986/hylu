@@ -232,46 +232,46 @@ int HYLU_L_Factorize
 int HYLU_C_Factorize
 (
 	_IN_ void *instance,
-	_IN_ const complex_t ax[] /*can be different from that used for HYLU_Analyze*/
+	_IN_ const complex_t ax[] /*can be different from that used for HYLU_C_Analyze*/
 );
 int HYLU_CL_Factorize
 (
 	_IN_ void *instance,
-	_IN_ const complex_t ax[] /*can be different from that used for HYLU_L_Analyze*/
+	_IN_ const complex_t ax[] /*can be different from that used for HYLU_CL_Analyze*/
 );
 
 /*
 * Solves Ax=b after A is factorized
 * @instance: solver instance
-* @transpose: whether to solve (A**T)x=b, note that HYLU uses row-major order by default
+* @mode: whether to solve Ax=b, (A**T)x=b, or (A**H)x=b, note that HYLU uses row-major order by default
 * @b: double/complex_t array of length n to specify right-hand-side vector
 * @x: double/complex_t array of length n to get solution
 */
 int HYLU_Solve
 (
 	_IN_ void *instance,
-	_IN_ bool transpose, /*false for row mode, true for column mode*/
+	_IN_ bool mode, /*false for row mode (Ax=b), true for column mode ((A**T)x=b)*/
 	_IN_ const double b[],
 	_OUT_ double x[] /*x space can overlap b space*/
 );
 int HYLU_L_Solve
 (
 	_IN_ void *instance,
-	_IN_ bool transpose, /*false for row mode, true for column mode*/
+	_IN_ bool mode, /*false for row mode (Ax=b), true for column mode ((A**T)x=b)*/
 	_IN_ const double b[],
 	_OUT_ double x[] /*x space can overlap b space*/
 );
 int HYLU_C_Solve
 (
 	_IN_ void *instance,
-	_IN_ bool transpose, /*false for row mode, true for column mode*/
+	_IN_ char mode, /*0 for Ax=b, 1 for (A**T)x=b, -1 for (A**H)x=b*/
 	_IN_ const complex_t b[],
 	_OUT_ complex_t x[] /*x space can overlap b space*/
 );
 int HYLU_CL_Solve
 (
 	_IN_ void *instance,
-	_IN_ bool transpose, /*false for row mode, true for column mode*/
+	_IN_ char mode, /*0 for Ax=b, 1 for (A**T)x=b, -1 for (A**H)x=b*/
 	_IN_ const complex_t b[],
 	_OUT_ complex_t x[] /*x space can overlap b space*/
 );
@@ -279,7 +279,7 @@ int HYLU_CL_Solve
 /*
 * Solves Ax=b (multiple x's and b's) after A is factorized
 * @instance: solver instance
-* @transpose: whether to solve (A**T)x=b, note that HYLU uses row-major order by default
+* @mode: whether to solve Ax=b, (A**T)x=b, or (A**H)x=b, note that HYLU uses row-major order by default
 * @nrhs: number of right-hand-side vectors
 * @b: double/complex_t array of length n*nrhs to specify right-hand-side vector
 * @x: double/complex_t array of length n*nrhs to get solution
@@ -287,7 +287,7 @@ int HYLU_CL_Solve
 int HYLU_MSolve
 (
 	_IN_ void *instance,
-	_IN_ bool transpose, /*false for row mode, true for column mode*/
+	_IN_ bool mode, /*false for row mode (Ax=b), true for column mode ((A**T)x=b)*/
 	_IN_ int nrhs,
 	_IN_ const double b[],
 	_OUT_ double x[] /*x space can overlap b space*/
@@ -295,7 +295,7 @@ int HYLU_MSolve
 int HYLU_L_MSolve
 (
 	_IN_ void *instance,
-	_IN_ bool transpose, /*false for row mode, true for column mode*/
+	_IN_ bool mode, /*false for row mode (Ax=b), true for column mode ((A**T)x=b)*/
 	_IN_ long long nrhs,
 	_IN_ const double b[],
 	_OUT_ double x[] /*x space can overlap b space*/
@@ -303,7 +303,7 @@ int HYLU_L_MSolve
 int HYLU_C_MSolve
 (
 	_IN_ void *instance,
-	_IN_ bool transpose, /*false for row mode, true for column mode*/
+	_IN_ char mode, /*0 for Ax=b, 1 for (A**T)x=b, -1 for (A**H)x=b*/
 	_IN_ int nrhs,
 	_IN_ const complex_t b[],
 	_OUT_ complex_t x[] /*x space can overlap b space*/
@@ -311,10 +311,67 @@ int HYLU_C_MSolve
 int HYLU_CL_MSolve
 (
 	_IN_ void *instance,
-	_IN_ bool transpose, /*false for row mode, true for column mode*/
+	_IN_ char mode, /*0 for Ax=b, 1 for (A**T)x=b, -1 for (A**H)x=b*/
 	_IN_ long long nrhs,
 	_IN_ const complex_t b[],
 	_OUT_ complex_t x[] /*x space can overlap b space*/
+);
+
+/*
+* Calculates (approximate) determinant of matrix, after matrix has been factorized
+* @instance: solver instance
+* @mantissa: returns mantissa of determinant
+* @exponent: returns exponent of determinant (determinant=mantissa*pow(10., exponent))
+*/
+int HYLU_Determinant
+(
+	_IN_ void *instance,
+	_OUT_ double *mantissa,
+	_OUT_ double *exponent
+);
+int HYLU_L_Determinant
+(
+	_IN_ void *instance,
+	_OUT_ double *mantissa,
+	_OUT_ double *exponent
+);
+int HYLU_C_Determinant
+(
+	_IN_ void *instance,
+	_OUT_ complex_t *mantissa,
+	_OUT_ double *exponent
+);
+int HYLU_CL_Determinant
+(
+	_IN_ void *instance,
+	_OUT_ complex_t *mantissa,
+	_OUT_ double *exponent
+);
+
+/*
+* Calculates (approximate) 1-norm condition number of (scaled) matrix, after matrix has been factorized
+* @instance: solver instance
+* @cond: returns condition number
+*/
+int HYLU_ConditionNumber
+(
+	_IN_ void *instance,
+	_OUT_ double *cond
+);
+int HYLU_L_ConditionNumber
+(
+	_IN_ void *instance,
+	_OUT_ double *cond
+);
+int HYLU_C_ConditionNumber
+(
+	_IN_ void *instance,
+	_OUT_ double *cond
+);
+int HYLU_CL_ConditionNumber
+(
+	_IN_ void *instance,
+	_OUT_ double *cond
 );
 
 #ifdef __cplusplus
