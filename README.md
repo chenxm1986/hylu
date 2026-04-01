@@ -1,14 +1,21 @@
 HYLU----Hybrid Parallel Sparse LU Factorization
 =========
-HYLU is a general-purpose parallel solver designed for efficiently solving sparse linear systems ($\bf{Ax}=\bf b$) on multi-core shared-memory machines. It employs an innovative parallel up-looking LU factorization algorithm, which dynamically adapts to varying matrix sparsity patterns by leveraging hybrid numerical kernels.
+HYLU is a general-purpose parallel solver designed for efficiently solving sparse linear systems ($\bf{Ax}=\bf b$) on multi-core shared-memory machines. It employs an innovative parallel up-looking matrix factorization algorithm, which dynamically adapts to varying matrix sparsity patterns by leveraging hybrid numerical kernels.
 
 
-HYLU delivers high-performance LU factorization for large-scale sparse linear systems from multiple engineering and scientific domains, including circuit simulation, power systems, computational fluid dynamics (CFD), electromagnetics, and structural analysis. The solver efficiently handles linear systems arising from finite element analysis, 2D/3D modeling, and optimization problems.
+HYLU delivers high-performance matrix factorization for large-scale sparse linear systems from multiple engineering and scientific domains, including circuit simulation, power systems, computational fluid dynamics (CFD), electromagnetics, and structural analysis. The solver efficiently handles linear systems arising from finite element analysis, 2D/3D modeling, and optimization problems. Unsymmetric, symmetric indefinite, and symmetric positive-definite matrices are supported.
 
 
 Performance Results
 ============
-For a wide range of matrices with different sparsities, HYLU achieves a **2.16X** speedup on geometric mean in numerical factorization compared with Intel MKL PARDISO, while the preprocessing and forward-backward substitution phases are also faster (**1.62X** and **1.59X** speedups, respectively). HYLU offers an optimization option for repeated solve of linear systems with an identical sparse pattern in the coefficient matrix. In this scenario, HYLU achieves a **2.66X** geometric mean speedup in numerical factorization over Intel MKL PARDISO, while the forward-backward substitution phase is slightly faster (**1.37X** speedup). Please see [doc/results.pdf](https://github.com/chenxm1986/hylu/blob/main/doc/results.pdf) for details. Generally, HYLU is much faster than Intel MKL PARDISO for highly sparse matrices, while for relatively dense matrices, HYLU achieves slightly higher performance than Intel MKL PARDISO.
+
+Please see [doc/results.pdf](https://github.com/chenxm1986/hylu/blob/main/doc/results.pdf) for details. 
+
+For one-time solve, HYLU is 1.70X faster than Intel MKL PARDISO on geometric mean in the total time of preprocessing, factorization, and solve.
+
+For repeated solve, HYLU is 2.53X faster than Intel MKL PARDISO on geometric mean in the time of factorization and solve.
+
+For the solution accuracy, HYLU achieves an order of magnitude higher accuracy than Intel MKL PARDISO.
 
 
 System Requirements
@@ -27,6 +34,10 @@ Functions for both 32-bit integers and 64-bit integers are provided. The latter 
 
 History
 ============
++ Version 20260331
+	+ Added support for symmetric indefinite and symmetric positive-definite matrices
+	+ Removed requirement of ensuring non-zero diagonals when using custom ordering
+
 + Version 20260205
 	+ Added functions to calculate determinant and condition number
 	+ Added solve of conjugate transposed system (only for complex number system)

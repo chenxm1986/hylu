@@ -1,6 +1,9 @@
 /*
-* HYLU (Hybrid Parallel Sparse LU Factorization) is a general-purpose parallel solver designed for efficiently solving sparse linear systems (Ax=b) 
-* on multi-core shared-memory machines.
+* HYLU (Hybrid Parallel Sparse LU Factorization) is a general-purpose parallel solver designed for efficiently solving sparse linear systems (Ax=b) on multi-core shared-memory machines.
+* HYLU uses compressed sparse ROW (CSR) format.
+* Unsymmetric, symmetric (Hermitian for complex numbers) indefinite, and symmetric (Hermitian for complex numbers) positive-definite (SPD) matrices are natively supported.
+* For symmetric matrices, CSR format must ONLY STORE UPPER TRIANGULAR PART (including diagonal).
+* For Hermitian complex number matrices, diagonal elements must be real numbers.
 */
 
 #ifndef __HYLU_H__
@@ -13,7 +16,7 @@
 * -3:   invalid matrix
 * -4:   out of memory
 * -5:   structurally singular
-* -6:   numerically singular
+* -6:   numerically singular or indefinite
 * -7:   threads error
 * -8:   calling procedure error
 * -9:   integer overflow
@@ -30,9 +33,9 @@
 * parm[5]: input, minimum # of supernode columns. [default 32]
 * parm[6]: input, maximum # of supernode rows. [default 0]: automatic control
 * parm[7]: output, time (in microsecond) of last function call
-* parm[8]: output, # of off-diagonal pivots
+* parm[8]: output (only for unsymmetric matrix), # of off-diagonal pivots
 * parm[9]: output, # of supernodes
-* parm[10]: input, pivot perturbation, zero or small pivot will be replaced by (10**parm[10])*||A||. [default -15]
+* parm[10]: input, pivot perturbation, zero or small pivot will be replaced by (10**parm[10])*||A||. [default -15 (unsymmetric); -10 (SPD); -12 (symmetric)]
 * parm[11]: output, # of perturbed pivots
 * parm[12]: output, current memory usage (in bytes), or needed memory size (in bytes) when -4 is returned
 * parm[13]: output, maximum memory usage (in bytes)
@@ -40,12 +43,13 @@
 * parm[15]: input, maximum # of refinement iterations. [default 0]: automatic control | >0: perform at most parm[15] iterations | <0: force to perform -parm[15] iterations
 * parm[16]: output, # of refinement iterations performed
 * parm[17]: output, # of nonzeros in L, including diagonal
-* parm[18]: output, # of nonzeros in U, excluding diagonal
+* parm[18]: output (only for unsymmetric matrix), # of nonzeros in U, excluding diagonal
 * parm[19]: output, # of flops of factorization (excluding scaling)
 * parm[20]: output, # of flops of solving (excluding scaling)
-* parm[21]: input, whether to scale matrix. [default >0]: dynamic scaling | <0: static scaling | 0: no scaling
-* parm[22]: input, symbolic factorization method. [default 0]: automatic control | >0: unsymmetric symbolic factorization | <0: symmetric symbolic factorization
+* parm[21]: input, whether to scale matrix. [default >0]: dynamic scaling | <0: static scaling (also dynamic scaling for symmetric matrices) | 0: no scaling
+* parm[22]: input (only for unsymmetric matrix), symbolic factorization method. [default 0]: automatic control | >0: unsymmetric symbolic factorization | <0: symmetric symbolic factorization
 * parm[23]: input, whether to ensure consistent symbolic results between sequential and parallel executions. [default !=0]: enabled | 0: disabled
+* parm[24]: output, singular row index (zero row in general matrix or negative diagonal in SPD matrix), when factorization failed with -6
 ********************************/
 
 #ifndef __cplusplus
@@ -119,12 +123,15 @@ int HYLU_CL_DestroySolver
 
 /*
 * Analyzes matrix for ordering and symbolic factorization
+* Input matrix is stored in compressed sparse ROW format
+* For symmetric matrix, only upper triangular half plus diagonal is needed
 * @instance: solver instance
 * @repeat: whether linear systems will be solved repeatedly with identical matrix structure (false for one-time solving)
 * @n: matrix dimension
 * @ap: integer array of length n+1, matrix row pointers
 * @ai: integer array of length ap[n], matrix column indexes
 * @ax: double/complex_t array of length ap[n], matrix values
+* @type: matrix type
 */
 int HYLU_Analyze
 (
@@ -133,7 +140,8 @@ int HYLU_Analyze
 	_IN_ int n,
 	_IN_ const int ap[],
 	_IN_ const int ai[],
-	_IN_ const double ax[] /*can be NULL (static pivoting and static scaling will be disabled)*/
+	_IN_ const double ax[], /*for unsymmetric matrix, can be NULL (static pivoting and static scaling will be disabled); not needed for symmetric matrix*/
+	_IN_ char type /*0: unsymmetric; >0: SPD; <0: symmetric indefinite*/
 );
 int HYLU_L_Analyze
 (
@@ -142,7 +150,8 @@ int HYLU_L_Analyze
 	_IN_ long long n,
 	_IN_ const long long ap[],
 	_IN_ const long long ai[],
-	_IN_ const double ax[] /*can be NULL (static pivoting and static scaling will be disabled)*/
+	_IN_ const double ax[], /*for unsymmetric matrix, can be NULL (static pivoting and static scaling will be disabled); not needed for symmetric matrix*/
+	_IN_ char type /*0: unsymmetric; >0: SPD; <0: symmetric indefinite*/
 );
 int HYLU_C_Analyze
 (
@@ -151,7 +160,8 @@ int HYLU_C_Analyze
 	_IN_ int n,
 	_IN_ const int ap[],
 	_IN_ const int ai[],
-	_IN_ const complex_t ax[] /*can be NULL (static pivoting and static scaling will be disabled)*/
+	_IN_ const complex_t ax[], /*for unsymmetric matrix, can be NULL (static pivoting and static scaling will be disabled); not needed for symmetric matrix*/
+	_IN_ char type /*0: unsymmetric; >0: Hermitian SPD; <0: Hermitian symmetric indefinite*/
 );
 int HYLU_CL_Analyze
 (
@@ -160,16 +170,20 @@ int HYLU_CL_Analyze
 	_IN_ long long n,
 	_IN_ const long long ap[],
 	_IN_ const long long ai[],
-	_IN_ const complex_t ax[] /*can be NULL (static pivoting and static scaling will be disabled)*/
+	_IN_ const complex_t ax[], /*for unsymmetric matrix, can be NULL (static pivoting and static scaling will be disabled); not needed for symmetric matrix*/
+	_IN_ char type /*0: unsymmetric; >0: Hermitian SPD; <0: Hermitian symmetric indefinite*/
 );
 
 /*
-* Analyzes matrix for symbolic factorization with user-provided ordering (must ensure a zero-free diagonal)
+* Analyzes matrix for symbolic factorization with user-provided ordering
+* Input matrix is stored in compressed sparse ROW format
+* For symmetric matrix, only upper triangular half plus diagonal is needed
 * @instance: solver instance
 * @repeat: whether linear systems will be solved repeatedly with identical matrix structure (false for one-time solving)
 * @n: matrix dimension
 * @ap: integer array of length n+1, matrix row pointers
 * @ai: integer array of length ap[n], matrix column indexes
+* @type: matrix type
 * @rperm: row permutation (rperm[i]=ii means row i in permuted matrix is row ii in original matrix)
 * @cperm: column permutation (cperm[j]=jj means column j in permuted matrix is column jj in original matrix)
 */
@@ -180,8 +194,9 @@ int HYLU_Analyze2
 	_IN_ int n,
 	_IN_ const int ap[],
 	_IN_ const int ai[],
-	_IN_ const int rperm[],
-	_IN_ const int cperm[]
+	_IN_ char type, /*0: unsymmetric; >0: SPD; <0: symmetric indefinite*/
+	_IN_ const int rperm[], /*symmetric permutation for symmetric matrix*/
+	_IN_ const int cperm[] /*not needed for symmetric matrix*/
 );
 int HYLU_L_Analyze2
 (
@@ -190,8 +205,9 @@ int HYLU_L_Analyze2
 	_IN_ long long n,
 	_IN_ const long long ap[],
 	_IN_ const long long ai[],
-	_IN_ const long long rperm[],
-	_IN_ const long long cperm[]
+	_IN_ char type, /*0: unsymmetric; >0: SPD; <0: symmetric indefinite*/
+	_IN_ const long long rperm[], /*symmetric permutation for symmetric matrix*/
+	_IN_ const long long cperm[] /*not needed for symmetric matrix*/
 );
 int HYLU_C_Analyze2
 (
@@ -200,8 +216,9 @@ int HYLU_C_Analyze2
 	_IN_ int n,
 	_IN_ const int ap[],
 	_IN_ const int ai[],
-	_IN_ const int rperm[],
-	_IN_ const int cperm[]
+	_IN_ char type, /*0: unsymmetric; >0: Hermitian SPD; <0: Hermitian symmetric indefinite*/
+	_IN_ const int rperm[], /*symmetric permutation for symmetric matrix*/
+	_IN_ const int cperm[] /*not needed for symmetric matrix*/
 );
 int HYLU_CL_Analyze2
 (
@@ -210,8 +227,9 @@ int HYLU_CL_Analyze2
 	_IN_ long long n,
 	_IN_ const long long ap[],
 	_IN_ const long long ai[],
-	_IN_ const long long rperm[],
-	_IN_ const long long cperm[]
+	_IN_ char type, /*0: unsymmetric; >0: Hermitian SPD; <0: Hermitian symmetric indefinite*/
+	_IN_ const long long rperm[], /*symmetric permutation for symmetric matrix*/
+	_IN_ const long long cperm[] /*not needed for symmetric matrix*/
 );
 
 /*
@@ -243,35 +261,35 @@ int HYLU_CL_Factorize
 /*
 * Solves Ax=b after A is factorized
 * @instance: solver instance
-* @mode: whether to solve Ax=b, (A**T)x=b, or (A**H)x=b, note that HYLU uses row-major order by default
+* @trans/mode (only for unsymmetric matrix): whether to solve Ax=b, (A**T)x=b, or (A**H)x=b, note that HYLU uses row-major order by default
 * @b: double/complex_t array of length n to specify right-hand-side vector
 * @x: double/complex_t array of length n to get solution
 */
 int HYLU_Solve
 (
 	_IN_ void *instance,
-	_IN_ bool mode, /*false for row mode (Ax=b), true for column mode ((A**T)x=b)*/
+	_IN_ bool trans, /*for unsymmetric matrix: false for row mode (Ax=b), true for column mode ((A**T)x=b); not used for symmetric matrix*/
 	_IN_ const double b[],
 	_OUT_ double x[] /*x space can overlap b space*/
 );
 int HYLU_L_Solve
 (
 	_IN_ void *instance,
-	_IN_ bool mode, /*false for row mode (Ax=b), true for column mode ((A**T)x=b)*/
+	_IN_ bool trans, /*for unsymmetric matrix: false for row mode (Ax=b), true for column mode ((A**T)x=b); not used for symmetric matrix*/
 	_IN_ const double b[],
 	_OUT_ double x[] /*x space can overlap b space*/
 );
 int HYLU_C_Solve
 (
 	_IN_ void *instance,
-	_IN_ char mode, /*0 for Ax=b, 1 for (A**T)x=b, -1 for (A**H)x=b*/
+	_IN_ char mode, /*for unsymmetric matrix: 0 for Ax=b, 1 for (A**T)x=b, -1 for (A**H)x=b; not used for symmetric matrix*/
 	_IN_ const complex_t b[],
 	_OUT_ complex_t x[] /*x space can overlap b space*/
 );
 int HYLU_CL_Solve
 (
 	_IN_ void *instance,
-	_IN_ char mode, /*0 for Ax=b, 1 for (A**T)x=b, -1 for (A**H)x=b*/
+	_IN_ char mode, /*for unsymmetric matrix: 0 for Ax=b, 1 for (A**T)x=b, -1 for (A**H)x=b; not used for symmetric matrix*/
 	_IN_ const complex_t b[],
 	_OUT_ complex_t x[] /*x space can overlap b space*/
 );
@@ -279,7 +297,7 @@ int HYLU_CL_Solve
 /*
 * Solves Ax=b (multiple x's and b's) after A is factorized
 * @instance: solver instance
-* @mode: whether to solve Ax=b, (A**T)x=b, or (A**H)x=b, note that HYLU uses row-major order by default
+* @trans/mode(only for unsymmetric matrix): whether to solve Ax=b, (A**T)x=b, or (A**H)x=b, note that HYLU uses row-major order by default
 * @nrhs: number of right-hand-side vectors
 * @b: double/complex_t array of length n*nrhs to specify right-hand-side vector
 * @x: double/complex_t array of length n*nrhs to get solution
@@ -287,7 +305,7 @@ int HYLU_CL_Solve
 int HYLU_MSolve
 (
 	_IN_ void *instance,
-	_IN_ bool mode, /*false for row mode (Ax=b), true for column mode ((A**T)x=b)*/
+	_IN_ bool trans, /*for unsymmetric matrix: false for row mode (Ax=b), true for column mode ((A**T)x=b); not used for symmetric matrix*/
 	_IN_ int nrhs,
 	_IN_ const double b[],
 	_OUT_ double x[] /*x space can overlap b space*/
@@ -295,7 +313,7 @@ int HYLU_MSolve
 int HYLU_L_MSolve
 (
 	_IN_ void *instance,
-	_IN_ bool mode, /*false for row mode (Ax=b), true for column mode ((A**T)x=b)*/
+	_IN_ bool trans, /*for unsymmetric matrix: false for row mode (Ax=b), true for column mode ((A**T)x=b); not used for symmetric matrix*/
 	_IN_ long long nrhs,
 	_IN_ const double b[],
 	_OUT_ double x[] /*x space can overlap b space*/
@@ -303,7 +321,7 @@ int HYLU_L_MSolve
 int HYLU_C_MSolve
 (
 	_IN_ void *instance,
-	_IN_ char mode, /*0 for Ax=b, 1 for (A**T)x=b, -1 for (A**H)x=b*/
+	_IN_ char mode, /*for unsymmetric matrix: 0 for Ax=b, 1 for (A**T)x=b, -1 for (A**H)x=b; not used for symmetric matrix*/
 	_IN_ int nrhs,
 	_IN_ const complex_t b[],
 	_OUT_ complex_t x[] /*x space can overlap b space*/
@@ -311,7 +329,7 @@ int HYLU_C_MSolve
 int HYLU_CL_MSolve
 (
 	_IN_ void *instance,
-	_IN_ char mode, /*0 for Ax=b, 1 for (A**T)x=b, -1 for (A**H)x=b*/
+	_IN_ char mode, /*for unsymmetric matrix: 0 for Ax=b, 1 for (A**T)x=b, -1 for (A**H)x=b; not used for symmetric matrix*/
 	_IN_ long long nrhs,
 	_IN_ const complex_t b[],
 	_OUT_ complex_t x[] /*x space can overlap b space*/
