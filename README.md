@@ -3,7 +3,9 @@ HYLU----Hybrid Parallel Sparse LU Factorization
 HYLU is a general-purpose parallel solver designed for efficiently solving sparse linear systems ($\bf{Ax}=\bf b$) on multi-core shared-memory machines. It employs an innovative parallel up-looking matrix factorization algorithm, which dynamically adapts to varying matrix sparsity patterns by leveraging hybrid numerical kernels.
 
 
-HYLU delivers high-performance matrix factorization for large-scale sparse linear systems from multiple engineering and scientific domains, including circuit simulation, power systems, computational fluid dynamics (CFD), electromagnetics, and structural analysis. The solver efficiently handles linear systems arising from finite element analysis, 2D/3D modeling, and optimization problems. Unsymmetric, symmetric indefinite, and symmetric positive-definite matrices are supported.
+HYLU delivers high-performance matrix factorization for large-scale sparse linear systems from multiple engineering and scientific domains, including circuit simulation, power systems, computational fluid dynamics (CFD), electromagnetics, and structural analysis. The solver efficiently handles linear systems arising from finite element analysis, 2D/3D modeling, and optimization problems. *Unsymmetric*, *symmetric indefinite*, and *symmetric positive-definite* matrices are supported.
+
+HYLU is extremely convenient to use. Only a single header file and a library file are needed. For most practical problems, users do not need to set or modify the control parameters.
 
 
 Performance Results
@@ -11,11 +13,11 @@ Performance Results
 
 Please see [doc/results.pdf](https://github.com/chenxm1986/hylu/blob/main/doc/results.pdf) for details. 
 
-For one-time solve, HYLU is 1.70X faster than Intel MKL PARDISO on geometric mean in the total time of preprocessing, factorization, and solve.
+For one-time solve, HYLU is **1.70X faster** than Intel MKL PARDISO on geometric mean in the total time of preprocessing, factorization, and solve.
 
-For repeated solve, HYLU is 2.53X faster than Intel MKL PARDISO on geometric mean in the time of factorization and solve.
+For repeated solve with idential symbolic structure but different values in the coefficient matrix, HYLU is **2.53X faster** than Intel MKL PARDISO on geometric mean in the time of factorization and solve.
 
-For the solution accuracy, HYLU achieves an order of magnitude higher accuracy than Intel MKL PARDISO.
+For the solution accuracy, HYLU achieves **an order of magnitude higher accuracy** than Intel MKL PARDISO.
 
 
 System Requirements
