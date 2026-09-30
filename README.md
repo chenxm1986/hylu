@@ -17,7 +17,7 @@ For one-time solve, HYLU is **1.70X faster** than Intel MKL PARDISO on geometric
 
 For repeated solve with idential symbolic structure but different values in the coefficient matrix, HYLU is **2.53X faster** than Intel MKL PARDISO on geometric mean in the time of factorization and solve.
 
-For the solution accuracy, HYLU achieves **an order of magnitude higher accuracy** than Intel MKL PARDISO.
+For the solution accuracy, HYLU achieves **one order of magnitude higher accuracy** than Intel MKL PARDISO.
 
 
 System Requirements
