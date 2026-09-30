@@ -112,13 +112,13 @@ static double L1NormOfResidual(const long long n, const long long ap[], const lo
 {
     complex_t *t = (complex_t *)malloc(sizeof(complex_t) * n);
     memset(t, 0, sizeof(complex_t) * n);
-    for (int i = 0; i < n; ++i)
+    for (long long i = 0; i < n; ++i)
     {
-        const int start = ap[i];
-        const int end = ap[i + 1];
-        for (int p = start; p < end; ++p)
+        const long long start = ap[i];
+        const long long end = ap[i + 1];
+        for (long long p = start; p < end; ++p)
         {
-            const int j = ai[p];
+            const long long j = ai[p];
             __cmuladd(t[i], ax[p], x[j]);
             if (j != i)
             {
@@ -127,7 +127,7 @@ static double L1NormOfResidual(const long long n, const long long ap[], const lo
         }
     }
     double s = 0., s2 = 0.;
-    for (int i = 0; i < n; ++i)
+    for (long long i = 0; i < n; ++i)
     {
         s += hypot(t[i][0] - b[i][0], t[i][1] - b[i][1]);
         s2 += hypot(b[i][0], b[i][1]);

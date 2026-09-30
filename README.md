@@ -36,6 +36,9 @@ Functions for both 32-bit integers and 64-bit integers are provided. The latter 
 
 History
 ============
++ Version 20260930
+	+ Performance improvement for parallel column mode solve of unsymmetric matrices
+
 + Version 20260331
 	+ Added support for symmetric indefinite and symmetric positive-definite matrices
 	+ Removed requirement of ensuring non-zero diagonals when using custom ordering
