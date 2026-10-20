@@ -36,6 +36,10 @@ Functions for both 32-bit integers and 64-bit integers are provided. The latter 
 
 History
 ============
++ Version 20261020
+	+ Adjusted default parm[3] for some types of matrices
+	+ Performance improvement for pre-processing
+
 + Version 20260930
 	+ Performance improvement for parallel column mode solve of unsymmetric matrices
 
