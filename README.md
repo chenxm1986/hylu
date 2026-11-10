@@ -36,6 +36,9 @@ Functions for both 32-bit integers and 64-bit integers are provided. The latter 
 
 History
 ============
++ Version 20261110
+	+ Performance improvement for sequential factorization for highly sparse matrices
+
 + Version 20261020
 	+ Adjusted default parm[3] for some types of matrices
 	+ Performance improvement for pre-processing
