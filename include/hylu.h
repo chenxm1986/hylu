@@ -46,7 +46,7 @@
 * parm[18]: output (only for unsymmetric matrix), # of nonzeros in U, excluding diagonal
 * parm[19]: output, # of flops of factorization (excluding scaling)
 * parm[20]: output, # of flops of solving (excluding scaling)
-* parm[21]: input, whether to scale matrix. [default >0]: dynamic scaling | <0: static scaling (also dynamic scaling for symmetric matrices) | 0: no scaling
+* parm[21]: input, whether to scale matrix. [default >0]: dynamic scaling | <0: static scaling (only for unsymmetric matrices; for symmetric matrices, <0 also means dynamic scaling) | 0: no scaling
 * parm[22]: input (only for unsymmetric matrix), symbolic factorization method. [default 0]: automatic control | >0: unsymmetric symbolic factorization | <0: symmetric symbolic factorization
 * parm[23]: input, whether to ensure consistent symbolic results between sequential and parallel executions. [default !=0]: enabled | 0: disabled
 * parm[24]: output, singular row index (zero row in general matrix or negative diagonal in SPD matrix), when factorization failed with -6
